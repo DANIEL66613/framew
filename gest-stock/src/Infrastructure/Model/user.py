@@ -7,7 +7,8 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)  # Aumentado para suportar hash de senha
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    celular = db.Column(db.String(20), nullable=True)
+    cnpj = db.Column(db.String(20), nullable=True)
     active = db.Column(db.Boolean, default=False, nullable=False)
     activation_code = db.Column(db.String(10), nullable=True)  # Código de ativação (excluído após ativação)
 
@@ -17,5 +18,7 @@ class User(db.Model):
             "id": self.id,
             "name": self.name,
             "email": self.email,
+            "celular": self.celular,
+            "cnpj": self.cnpj,
             "active": self.active
         }
