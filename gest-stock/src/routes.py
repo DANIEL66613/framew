@@ -44,3 +44,7 @@ def init_routes(app):
 
     # Rotas para gerenciamento de produtos
     app.register_blueprint(product_controller)  # Registrando o controlador de produtos
+
+    @app.route('/venda', methods=['POST'])
+    def realizar_venda():
+        return ProductController.realizar_venda()

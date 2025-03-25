@@ -75,3 +75,24 @@ def deactivate_product(product_id):
     if product:
         return jsonify({"message": "Produto inativado com sucesso!"})
     return jsonify({"message": "Produto não encontrado"}), 404
+
+@staticmethod
+def realizar_venda():
+    """Rota para realizar uma venda"""
+    data = request.get_json()
+
+    produto_id = data.get('produto_id')
+    quantidade_vendida = data.get('quantidade_vendida')
+
+    try:
+        # Chama o serviço para realizar a venda
+        venda = ProductService.realizar_venda(produto_id, quantidade_vendida)
+        return make_response(jsonify({
+            "mensagem": "Venda realizada com sucesso!",
+            "venda_id": venda.id,
+            "produto": venda.produto.nome,
+            "quantidade_vendida": venda.quantidade_vendida,
+            "preco_unitario": venda.preco_unitario
+        }), 201)
+    except Exception as e:
+        return make_response(jsonify({"erro": str(e)}), 400)

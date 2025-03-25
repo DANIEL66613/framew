@@ -49,3 +49,45 @@ class ProductService:
             db.session.commit()
             return product
         return None
+    @staticmethod
+    def realizar_venda(produto_id, quantidade_vendida):
+        """Realiza a venda de um produto e registra no banco de dados"""
+        
+        # Obter o produto
+        produto = Produto.query.filter_by(id=produto_id).first()
+
+        if not produto:
+            raise Exception("Produto não encontrado.")
+        
+        if produto.status != 'Ativo':
+            raise Exception("Produto inativo, não pode ser vendido.")
+        
+        if produto.quantidade_em_estoque < quantidade_vendida:
+            raise Exception("Quantidade em estoque insuficiente para a venda.")
+        
+        # Calcular o preço total da venda
+        preco_unitario = produto.preco
+        total_venda = preco_unitario * quantidade_vendida
+
+        # Criar a venda
+        nova_venda = Venda(
+            produto_id=produto.id,
+            quantidade_vendida=quantidade_vendida,
+            preco_unitario=preco_unitario
+        )
+        
+        # Atualizar o estoque do produto
+        produto.quantidade_em_estoque -= quantidade_vendida
+        
+        try:
+            # Salvar a venda no banco de dados
+            db.session.add(nova_venda)
+            db.session.commit()
+
+            # Atualizar o estoque do produto
+            db.session.commit()
+
+            return nova_venda
+        except IntegrityError:
+            db.session.rollback()
+            raise Exception("Erro ao registrar a venda.")
