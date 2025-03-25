@@ -6,6 +6,7 @@ from flask import jsonify, make_response, request
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 from Application.Controllers.user_controller import UserController
+from Application.Controllers.product_controller import product_controller  # Importando o controlador de produtos
 
 def init_routes(app):    
     @app.route('/api', methods=['GET'])
@@ -40,3 +41,6 @@ def init_routes(app):
     @app.route('/user/<int:user_id>', methods=['GET'])
     def get_user(user_id):
         return UserController.get_user(user_id)
+
+    # Rotas para gerenciamento de produtos
+    app.register_blueprint(product_controller)  # Registrando o controlador de produtos

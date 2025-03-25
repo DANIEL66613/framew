@@ -1,20 +1,44 @@
 from src.Domain.user import UserDomain
 from src.Infrastructure.Model.user import User
 from src.config.data_base import db
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 import jwt
 import datetime
 from src.config.config import SECRET_KEY
+from src.Infrastructure.http.whatsapp import WhatsAppService  # Alterado para importar a classe
 
 class UserService:
     @staticmethod
-    def create_user(name, email, password):
-        """Cria um novo usuário no banco de dados"""
+    def create_user(name, email, password, phone_number, cnpj):
+        """Cria um novo usuário no banco de dados e envia código de ativação via WhatsApp"""
+        
+        # Gerar código de ativação de 4 dígitos
+        activation_code = str(random.randint(1000, 9999))
+
+        # Hash da senha
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+
+        # Criando o novo usuário no domínio
         new_user = UserDomain(name, email, hashed_password)
-        user = User(name=new_user.name, email=new_user.email, password=new_user.password, active=False, activation_code="1234")  # Gera código temporário
+        
+        # Criar a entrada do usuário no banco de dados
+        user = User(
+            name=new_user.name,
+            email=new_user.email,
+            password=new_user.password,
+            phone_number=phone_number,  # Novo campo
+            cnpj=cnpj,  # Novo campo
+            active=False,
+            activation_code=activation_code  # Código de ativação
+        )
+
+        # Salvar no banco de dados
         db.session.add(user)
         db.session.commit()
+
+        # Enviar o código via WhatsApp
+        WhatsAppService.enviar_mensagem(phone_number, activation_code)  # Alterado para usar a classe e função corretas
+
         return user
 
     @staticmethod
